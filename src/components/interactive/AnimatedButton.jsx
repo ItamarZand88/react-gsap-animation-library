@@ -1,88 +1,68 @@
-import React, { useRef, useState, useEffect } from 'react';
-import useSafeAnimation from '../../utils/useSafeAnimation';
+import React, { useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { useAnimationSettings } from '../../context/AnimationContext';
-import { injectCSSKeyframes } from '../../utils/fallbacks';
 
 /**
- * AnimatedButton component for creating animated button effects
+ * AnimatedButton component with various interaction effects using GSAP
  * 
  * @param {Object} props - Component props
  * @param {React.ReactNode} props.children - Button content
- * @param {string} props.effect - Button animation effect ('ripple', 'shine', 'pulse', 'scale', 'fill')
- * @param {string} props.effectColor - Color of the button effect
+ * @param {string} props.effect - Animation effect ('ripple', 'shine', 'pulse', 'scale', 'fill')
+ * @param {string} props.effectColor - Color of the animation effect
  * @param {number} props.duration - Animation duration in seconds
- * @param {number} props.delay - Animation delay in seconds
- * @param {string} props.ease - Easing function
- * @param {string} props.trigger - Animation trigger type ('hover', 'click', 'none')
- * @param {function} props.onClick - Callback when button is clicked
- * @param {function} props.onMouseEnter - Callback when mouse enters button
- * @param {function} props.onMouseLeave - Callback when mouse leaves button
+ * @param {string} props.ease - GSAP easing function
+ * @param {function} props.onClick - Click handler
+ * @param {boolean} props.asChild - Whether to apply props to children instead of creating a button
  * @param {string} props.className - Additional CSS class names
  * @param {Object} props.style - Custom styles
- * @param {boolean} props.asChild - Whether to render a button or use children as the button
  */
 const AnimatedButton = ({
   children,
   effect = 'ripple',
   effectColor = 'rgba(255, 255, 255, 0.4)',
   duration = 0.6,
-  delay = 0,
   ease = "power2.out",
-  trigger = 'hover',
   onClick = () => {},
-  onMouseEnter = () => {},
-  onMouseLeave = () => {},
   className = '',
   style = {},
   asChild = false,
   ...otherProps
 }) => {
-  // References to DOM elements
   const buttonRef = useRef(null);
   const effectRef = useRef(null);
+  const { disableAllAnimations } = useAnimationSettings();
   
-  // Animation state
-  const [animationState, setAnimationState] = useState({
-    isAnimating: false,
-    mousePosition: { x: 0, y: 0 }
-  });
-  
-  // Get global animation settings
-  const {
-    disableAllAnimations
-  } = useAnimationSettings();
-  
-  // Use safe animation hook
-  const { animate, isGsapAvailable } = useSafeAnimation(buttonRef);
-  
-  // Inject CSS keyframes for fallback
-  useEffect(() => {
-    injectCSSKeyframes();
-  }, []);
-  
-  // Initialize effect element for certain animations
-  useEffect(() => {
+  // Initialize GSAP context and get contextSafe function
+  const { contextSafe } = useGSAP(() => {
+    if (disableAllAnimations) return;
+    
+    // Create effect element for certain effects
     if (['ripple', 'shine'].includes(effect) && buttonRef.current && !effectRef.current) {
       const effectElement = document.createElement('span');
       effectElement.className = `animated-button-effect ${effect}-effect`;
-      effectElement.style.position = 'absolute';
       
       if (effect === 'ripple') {
-        effectElement.style.borderRadius = '50%';
-        effectElement.style.backgroundColor = effectColor;
-        effectElement.style.transform = 'scale(0)';
-        effectElement.style.pointerEvents = 'none';
-        effectElement.style.zIndex = '1';
+        Object.assign(effectElement.style, {
+          position: 'absolute',
+          borderRadius: '50%',
+          backgroundColor: effectColor,
+          transform: 'scale(0)',
+          pointerEvents: 'none',
+          zIndex: '1'
+        });
       } else if (effect === 'shine') {
-        effectElement.style.position = 'absolute';
-        effectElement.style.top = '0';
-        effectElement.style.left = '-100%';
-        effectElement.style.width = '60%';
-        effectElement.style.height = '100%';
-        effectElement.style.background = `linear-gradient(to right, transparent 0%, ${effectColor} 50%, transparent 100%)`;
-        effectElement.style.transform = 'skewX(-25deg)';
-        effectElement.style.pointerEvents = 'none';
-        effectElement.style.zIndex = '1';
+        Object.assign(effectElement.style, {
+          position: 'absolute',
+          top: '0',
+          left: '-100%',
+          width: '60%',
+          height: '100%',
+          background: `linear-gradient(to right, transparent 0%, ${effectColor} 50%, transparent 100%)`,
+          transform: 'skewX(-25deg)',
+          pointerEvents: 'none',
+          zIndex: '1'
+        });
       }
       
       buttonRef.current.style.position = 'relative';
@@ -92,281 +72,171 @@ const AnimatedButton = ({
     }
     
     return () => {
-      // Clean up effect element on unmount
+      // Clean up effect element
       if (effectRef.current && buttonRef.current) {
         try {
           buttonRef.current.removeChild(effectRef.current);
+          effectRef.current = null;
         } catch (e) {
-          // Element might have already been removed
+          // Element might have been removed already
         }
       }
     };
-  }, [effect, effectColor]);
-  
-  // Handle mouse position tracking for ripple effect
-  const handleMousePosition = (e) => {
-    if (!buttonRef.current || !['ripple'].includes(effect)) return;
-    
-    const rect = buttonRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    setAnimationState(prev => ({
-      ...prev,
-      mousePosition: { x, y }
-    }));
-  };
-  
-  // Play animations
-  const playAnimation = (e) => {
-    if (disableAllAnimations || animationState.isAnimating) return;
-    
-    setAnimationState(prev => ({ ...prev, isAnimating: true }));
-    
-    // Different animations based on effect type
-    switch (effect) {
-      case 'ripple':
-        playRippleEffect(e);
-        break;
-      case 'shine':
-        playShineEffect();
-        break;
-      case 'pulse':
-        playPulseEffect();
-        break;
-      case 'scale':
-        playScaleEffect();
-        break;
-      case 'fill':
-        playFillEffect();
-        break;
-      default:
-        // Do nothing for unknown effects
-        setAnimationState(prev => ({ ...prev, isAnimating: false }));
-    }
-  };
+  }, { 
+    scope: buttonRef,
+    dependencies: [effect, effectColor, disableAllAnimations] 
+  });
   
   // Ripple effect animation
-  const playRippleEffect = (e) => {
-    if (!effectRef.current || !buttonRef.current) return;
+  const createRippleEffect = contextSafe((e) => {
+    if (disableAllAnimations || !buttonRef.current || !effectRef.current) return;
     
-    // Get click/mouse position
-    let x, y;
-    if (e) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      x = e.clientX - rect.left;
-      y = e.clientY - rect.top;
-    } else {
-      // Default to center for non-event triggers
-      const rect = buttonRef.current.getBoundingClientRect();
-      x = rect.width / 2;
-      y = rect.height / 2;
-    }
-    
-    // Calculate ripple size (should be larger than the button)
-    const size = Math.max(buttonRef.current.offsetWidth, buttonRef.current.offsetHeight) * 2;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const x = e ? (e.clientX - rect.left) : rect.width / 2;
+    const y = e ? (e.clientY - rect.top) : rect.height / 2;
+    const size = Math.max(rect.width, rect.height) * 2;
     
     // Position the ripple element
-    effectRef.current.style.left = `${x - size / 2}px`;
-    effectRef.current.style.top = `${y - size / 2}px`;
-    effectRef.current.style.width = `${size}px`;
-    effectRef.current.style.height = `${size}px`;
+    gsap.set(effectRef.current, {
+      x: x - size / 2,
+      y: y - size / 2,
+      width: size,
+      height: size,
+      opacity: 0.5,
+      scale: 0
+    });
     
     // Animate the ripple
-    animate({
-      to: {
-        opacity: [0, 0.2, 0],
-        scale: [0, 1],
-        duration,
-        ease,
-        onComplete: () => {
-          setAnimationState(prev => ({ ...prev, isAnimating: false }));
-        }
-      }
-    }, effectRef.current);
-  };
+    gsap.to(effectRef.current, {
+      scale: 1,
+      opacity: 0,
+      duration,
+      ease
+    });
+  });
   
   // Shine effect animation
-  const playShineEffect = () => {
-    if (!effectRef.current) return;
+  const createShineEffect = contextSafe(() => {
+    if (disableAllAnimations || !effectRef.current) return;
     
-    animate({
-      to: {
-        left: '100%',
-        duration,
+    gsap.fromTo(effectRef.current, 
+      { left: '-100%' },
+      { 
+        left: '100%', 
+        duration, 
         ease,
         onComplete: () => {
-          // Reset position
-          if (effectRef.current) {
-            effectRef.current.style.left = '-100%';
-          }
-          setAnimationState(prev => ({ ...prev, isAnimating: false }));
+          gsap.set(effectRef.current, { left: '-100%' });
         }
       }
-    }, effectRef.current);
-  };
+    );
+  });
   
   // Pulse effect animation
-  const playPulseEffect = () => {
-    animate({
-      to: {
-        scale: 1.05,
-        duration: duration / 2,
-        ease: 'power1.out',
-        onComplete: () => {
-          // Return to normal size
-          animate({
-            to: {
-              scale: 1,
-              duration: duration / 2,
-              ease: 'power1.in',
-              onComplete: () => {
-                setAnimationState(prev => ({ ...prev, isAnimating: false }));
-              }
-            }
-          }, buttonRef.current);
-        }
+  const createPulseEffect = contextSafe(() => {
+    if (disableAllAnimations || !buttonRef.current) return;
+    
+    gsap.to(buttonRef.current, {
+      scale: 1.05,
+      duration: duration / 2,
+      ease: 'power1.out',
+      onComplete: () => {
+        gsap.to(buttonRef.current, {
+          scale: 1,
+          duration: duration / 2,
+          ease: 'power1.in'
+        });
       }
-    }, buttonRef.current);
-  };
+    });
+  });
   
   // Scale effect animation
-  const playScaleEffect = () => {
-    animate({
-      to: {
-        scale: 0.95,
-        duration: duration / 2,
-        ease: 'power2.out',
-        onComplete: () => {
-          // Return to normal size
-          animate({
-            to: {
-              scale: 1,
-              duration: duration / 2,
-              ease: 'elastic.out(1, 0.3)',
-              onComplete: () => {
-                setAnimationState(prev => ({ ...prev, isAnimating: false }));
-              }
-            }
-          }, buttonRef.current);
-        }
-      }
-    }, buttonRef.current);
-  };
-  
-  // Fill effect animation (using background-color)
-  const playFillEffect = () => {
-    const originalBg = getComputedStyle(buttonRef.current).backgroundColor;
+  const createScaleEffect = contextSafe(() => {
+    if (disableAllAnimations || !buttonRef.current) return;
     
-    animate({
-      to: {
-        backgroundColor: effectColor,
-        duration,
-        ease,
-        onComplete: () => {
-          // Only reset if we're not still hovering
-          if (trigger !== 'hover') {
-            animate({
-              to: {
-                backgroundColor: originalBg,
-                duration,
-                ease,
-                onComplete: () => {
-                  setAnimationState(prev => ({ ...prev, isAnimating: false }));
-                }
-              }
-            }, buttonRef.current);
-          } else {
-            setAnimationState(prev => ({ ...prev, isAnimating: false }));
-          }
-        }
+    gsap.to(buttonRef.current, {
+      scale: 0.95,
+      duration: duration / 3,
+      ease: 'power2.out',
+      onComplete: () => {
+        gsap.to(buttonRef.current, {
+          scale: 1,
+          duration: duration / 2,
+          ease: 'elastic.out(1, 0.3)'
+        });
       }
-    }, buttonRef.current);
-  };
+    });
+  });
   
-  // Reset animation (especially useful for hover effects)
-  const resetAnimation = () => {
-    if (disableAllAnimations) return;
+  // Fill effect animation
+  const createFillEffect = contextSafe(() => {
+    if (disableAllAnimations || !buttonRef.current) return;
     
-    // For hoverable effects, we need to reset when mouse leaves
-    if (trigger === 'hover') {
-      switch (effect) {
-        case 'fill':
-          // Reset fill color
-          const originalBg = window.getComputedStyle(buttonRef.current).getPropertyValue('background-color');
-          animate({
-            to: {
-              backgroundColor: originalBg,
-              duration,
-              ease,
-              onComplete: () => {
-                setAnimationState(prev => ({ ...prev, isAnimating: false }));
-              }
-            }
-          }, buttonRef.current);
-          break;
-          
-        default:
-          // Most effects auto-reset already
-          setAnimationState(prev => ({ ...prev, isAnimating: false }));
+    const originalBg = window.getComputedStyle(buttonRef.current).backgroundColor;
+    
+    gsap.to(buttonRef.current, {
+      backgroundColor: effectColor,
+      duration,
+      ease,
+      onComplete: () => {
+        gsap.to(buttonRef.current, {
+          backgroundColor: originalBg,
+          duration,
+          ease
+        });
       }
-    }
-  };
+    });
+  });
   
-  // Handle click event
-  const handleClick = (e) => {
-    if (trigger === 'click') {
-      playAnimation(e);
+  // Combined click handler
+  const handleClick = contextSafe((e) => {
+    if (disableAllAnimations) {
+      onClick(e);
+      return;
     }
+    
+    // Apply effect based on type
+    switch (effect) {
+      case 'ripple':
+        createRippleEffect(e);
+        break;
+      case 'shine':
+        createShineEffect();
+        break;
+      case 'pulse':
+        createPulseEffect();
+        break;
+      case 'scale':
+        createScaleEffect();
+        break;
+      case 'fill':
+        createFillEffect();
+        break;
+      default:
+        // No effect
+    }
+    
+    // Call the provided onClick handler
     onClick(e);
-  };
-  
-  // Handle mouse enter event
-  const handleMouseEnter = (e) => {
-    handleMousePosition(e);
-    if (trigger === 'hover') {
-      playAnimation(e);
-    }
-    onMouseEnter(e);
-  };
-  
-  // Handle mouse leave event
-  const handleMouseLeave = (e) => {
-    if (trigger === 'hover') {
-      resetAnimation();
-    }
-    onMouseLeave(e);
-  };
-  
-  // Handle mouse move event (for updating ripple position)
-  const handleMouseMove = (e) => {
-    handleMousePosition(e);
-  };
+  });
   
   // Combined props for rendering
-  const combinedStyle = {
-    ...style,
-    position: 'relative',
-    overflow: 'hidden'
-  };
-  
   const componentProps = {
     ref: buttonRef,
-    className: `react-gsap-animated-button ${effect}-effect ${className}`,
-    style: combinedStyle,
+    className: `react-gsap-button ${effect}-button ${className}`,
     onClick: handleClick,
-    onMouseEnter: handleMouseEnter,
-    onMouseLeave: handleMouseLeave,
-    onMouseMove: effect === 'ripple' ? handleMouseMove : undefined,
-    'data-effect': effect,
-    'data-animation-state': animationState.isAnimating ? 'running' : 'idle',
+    style: {
+      position: 'relative',
+      overflow: 'hidden',
+      ...style
+    },
     ...otherProps
   };
   
-  // Render either as a button or wrap the children
-  if (asChild) {
+  // Render either as a button or wrap children
+  if (asChild && React.Children.count(children) === 1) {
     return React.cloneElement(
-      React.Children.only(children), 
+      React.Children.only(children),
       componentProps
     );
   }
