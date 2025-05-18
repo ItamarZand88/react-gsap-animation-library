@@ -2,11 +2,26 @@
 
 A comprehensive React component library that leverages GSAP for animations. This library provides ready-to-use, animated UI components that can be easily integrated into any React project.
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
 ## Installation
 
 ```bash
 npm install react-gsap-animation-library gsap
 ```
+
+Make sure to install GSAP as a peer dependency, as it's required for all animations to work.
+
+## Features
+
+- 🚀 **15+ Ready-to-use Animation Components** – Just import and use
+- 🎭 **Scroll-triggered Animations** – Elements animate as they enter the viewport
+- 🧩 **Interactive Components** – Magnetic elements, animated cursors, and more
+- 📝 **Text Animation** – Reveal, split, and animate text in various ways
+- 🖼️ **Animated Backgrounds** – Create dynamic, interactive backgrounds
+- 📊 **Scroll Progress Indicators** – Show scroll progress in various styles
+- 🧰 **Animation Utilities** – Reusable animation functions and hooks
 
 ## Components
 
@@ -51,136 +66,17 @@ import { SlideIn } from 'react-gsap-animation-library';
 </SlideIn>
 ```
 
-### Interactive Components
-
-#### AnimatedButton
-
-A button with hover and click animations.
-
-```jsx
-import { AnimatedButton } from 'react-gsap-animation-library';
-
-<AnimatedButton
-  onClick={() => console.log('Button clicked!')}
-  className="my-button"
-  hoverScale={1.05}
-  clickScale={0.95}
-  duration={0.3}
-  style={{ padding: '10px 20px', backgroundColor: 'blue', color: 'white' }}
->
-  Click Me
-</AnimatedButton>
-```
-
-#### AnimatedCard
-
-A card component with hover animations.
-
-```jsx
-import { AnimatedCard } from 'react-gsap-animation-library';
-
-<AnimatedCard
-  hoverEffect="3d" // 'lift', '3d', 'glow', or 'none'
-  duration={0.3}
-  hoverScale={1.03}
-  tiltAmount={10} // For 3D effect
-  style={{ padding: '20px', backgroundColor: 'white' }}
->
-  <h3>Card Title</h3>
-  <p>Card content goes here.</p>
-</AnimatedCard>
-```
-
-#### AnimatedList
-
-A component to animate list items in sequence.
-
-```jsx
-import { AnimatedList } from 'react-gsap-animation-library';
-
-<AnimatedList
-  stagger={0.1}
-  duration={0.5}
-  from={{ opacity: 0, y: 30 }}
-  threshold={0.2}
-  delay={0}
-  ease="power3.out"
->
-  <div>Item 1</div>
-  <div>Item 2</div>
-  <div>Item 3</div>
-</AnimatedList>
-```
-
-#### TextReveal
-
-A component that reveals text with a masking effect.
-
-```jsx
-import { TextReveal } from 'react-gsap-animation-library';
-
-<TextReveal
-  duration={1}
-  delay={0}
-  threshold={0.2}
-  ease="power3.out"
-  color="black"
-  fontSize="24px"
-  fontWeight="bold"
-  lineHeight="1.5"
-  textAlign="center"
->
-  This text will be revealed with a masking effect.
-</TextReveal>
-```
-
-### Text Animation Components
-
-#### SplitText
-
-A component that splits text and animates each character, word, or line.
-
-```jsx
-import { SplitText } from 'react-gsap-animation-library';
-
-<SplitText
-  type="chars" // 'chars', 'words', or 'lines'
-  animation="fadeIn" // 'fadeIn', 'stagger', 'wave', 'random'
-  duration={0.5}
-  stagger={0.03}
-  delay={0}
-  threshold={0.2}
-  ease="power3.out"
-  color="black"
->
-  This text will be split and animated.
-</SplitText>
-```
+For a complete list of components and detailed documentation, see the [Components Documentation](#) section below.
 
 ## Utility Hooks
 
-### useGsapAnimation
-
-A hook for applying GSAP animations to elements.
+The library provides several custom React hooks to help with animations:
 
 ```jsx
-import { useGsapAnimation } from 'react-gsap-animation-library/utils/hooks';
+import { useScrollAnimation, useGsapAnimation } from 'react-gsap-animation-library';
 import { animations } from 'react-gsap-animation-library/utils/animations';
 
-const MyComponent = () => {
-  const elementRef = useGsapAnimation(animations.pulse, { duration: 0.8 });
-  
-  return <div ref={elementRef}>Animated element</div>;
-};
-```
-
-### useScrollAnimation
-
-A hook for creating scroll-triggered animations.
-
-```jsx
-import { useScrollAnimation } from 'react-gsap-animation-library/utils/hooks';
-
+// For scroll-triggered animations
 const MyComponent = () => {
   const elementRef = useScrollAnimation({
     animation: 'fadeIn',
@@ -190,59 +86,64 @@ const MyComponent = () => {
   
   return <div ref={elementRef}>Scrolling reveals this element</div>;
 };
-```
 
-### useGsapTimeline
-
-A hook for creating and managing GSAP timelines.
-
-```jsx
-import { useGsapTimeline } from 'react-gsap-animation-library/utils/hooks';
-import { useRef, useEffect } from 'react';
-
-const MyComponent = () => {
-  const elementRef = useRef(null);
-  const timelineRef = useGsapTimeline({
-    scrollTrigger: {
-      trigger: elementRef.current,
-      start: 'top center'
-    }
-  });
+// For applying animation presets
+const MyOtherComponent = () => {
+  const elementRef = useGsapAnimation(animations.pulse, { duration: 0.8 });
   
-  useEffect(() => {
-    if (elementRef.current && timelineRef.current) {
-      timelineRef.current.from(elementRef.current, {
-        opacity: 0,
-        y: 50,
-        duration: 1
-      });
-    }
-  }, []);
-  
-  return <div ref={elementRef}>Timeline animated element</div>;
+  return <div ref={elementRef}>This element can be animated</div>;
 };
 ```
 
-## Animation Utilities
+## Examples
 
-The library provides reusable animation presets and custom easing functions:
+Check out the [examples](https://github.com/ItamarZand88/react-gsap-animation-library/tree/main/examples) directory for comprehensive usage examples:
 
-```jsx
-import { animations, easings } from 'react-gsap-animation-library';
+- **Basic Examples**: Core animation components
+- **Text Examples**: Text animation components
+- **Interactive Examples**: Interactive animation components
+- **Advanced Examples**: Scroll-triggered and complex animations
 
-// Use animation presets
-animations.fadeIn(element, { duration: 0.8, delay: 0.2 });
-animations.bounceIn(element);
-animations.slideIn(element, { direction: 'left' });
-animations.pulse(element);
+To run the examples:
 
-// Use custom easing functions
-gsap.to(element, {
-  y: 100,
-  ease: easings.bounceOut,
-  duration: 1
-});
+```bash
+git clone https://github.com/ItamarZand88/react-gsap-animation-library.git
+cd react-gsap-animation-library
+npm install
+# Create an example app that imports components from the examples folder
 ```
+
+## Components Documentation
+
+### Basic Animation Components
+
+- **FadeIn**: Fade in elements as they enter the viewport
+- **SlideIn**: Slide in elements from different directions
+- **AnimatedButton**: Buttons with hover and click animations
+- **AnimatedCard**: Cards with hover effects (lift, 3D, glow)
+- **AnimatedList**: Animate list items in sequence
+
+### Text Animation Components
+
+- **TextReveal**: Reveal text with a masking effect
+- **SplitText**: Split and animate text by characters, words, or lines
+- **AnimatedCounter**: Animate counting from one number to another
+- **Marquee**: Create an infinite scrolling text effect
+
+### Advanced Animation Components
+
+- **ParallaxSection**: Create sections with parallax background effects
+- **ScrollTriggeredTimeline**: Complex animations triggered by scroll position
+- **MagneticElement**: Elements that are attracted to the cursor
+- **AnimatedCursor**: Custom animated cursor with trails
+- **AnimatedBackground**: Animated canvas backgrounds with patterns
+- **ScrollProgress**: Progress indicators for scroll position
+
+### Utility Functions and Hooks
+
+- **animations**: Reusable animation presets
+- **easings**: Custom easing functions
+- **hooks**: React hooks for GSAP animations
 
 ## Browser Support
 
@@ -257,6 +158,10 @@ This library uses modern JavaScript features and GSAP. It is compatible with all
 
 - React 16.8.0 or higher
 - GSAP 3.0.0 or higher
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
