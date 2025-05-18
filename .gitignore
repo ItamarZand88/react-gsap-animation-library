@@ -30,4 +30,8 @@ yarn-error.log*
 # NPM
 .npmrc
 .npm
+
+# Internal Documentation
+TESTING.md
+PUBLISHING.md
 .early.coverage
