@@ -3,8 +3,13 @@
  * Run with: node rename-jsx-files.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get current directory name since __dirname isn't available in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Path to components directory
 const componentsDir = path.join(__dirname, 'src', 'components');
