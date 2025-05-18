@@ -11,6 +11,7 @@ Version 2.0.0 brings significant improvements:
 - Removal of the CSS and Web Animation API fallbacks in favor of a GSAP-first approach
 - More powerful and customizable components
 - Enhanced accessibility features
+- New components like `TypingText` for typewriter effects
 
 ## Installation Changes
 
@@ -78,7 +79,8 @@ import {
   FadeIn, 
   SlideIn, 
   TextReveal, 
-  AnimatedButton 
+  AnimatedButton,
+  TypingText    // New component
 } from 'react-gsap-animation-library';
 ```
 
@@ -241,6 +243,29 @@ function MyComponent() {
 </AnimatedButton>
 ```
 
+### New TypingText Component
+
+```jsx
+// New in v2.0.0
+import { TypingText } from 'react-gsap-animation-library';
+
+// Single text
+<TypingText 
+  text="This is a typing text animation"
+  typingSpeed={10}
+  cursorBlink={true}
+/>
+
+// Multiple text sequences with loop
+<TypingText 
+  text={["First sentence", "Second sentence", "Third sentence"]}
+  typingSpeed={10}
+  deleteSpeed={5}
+  delayBetweenTexts={1.5}
+  loop={Infinity}
+/>
+```
+
 ## Hooks Usage
 
 ### Using Animation Hooks
@@ -285,6 +310,84 @@ function MyComponent() {
     <div ref={containerRef}>
       <button onClick={play}>Animate</button>
     </div>
+  );
+}
+```
+
+### New Hook: useAnimationEffect
+
+```jsx
+// New in v2.0.0
+import { useAnimationEffect } from 'react-gsap-animation-library';
+import { useRef } from 'react';
+
+function MyComponent() {
+  const elementRef = useRef(null);
+  
+  // Apply predefined animation effect
+  useAnimationEffect(elementRef, {
+    effect: 'fadeIn',    // Predefined effect
+    direction: 'up',     
+    duration: 0.8,       
+    trigger: 'scroll'    // Trigger on scroll
+  });
+  
+  return <div ref={elementRef}>Content with animation effect</div>;
+}
+```
+
+### New Hook: useScrollTrigger
+
+```jsx
+// New in v2.0.0
+import { useScrollTrigger } from 'react-gsap-animation-library';
+import { useRef } from 'react';
+
+function MyScrollComponent() {
+  const elementRef = useRef(null);
+  
+  // Create scroll-based animation
+  useScrollTrigger(elementRef, {
+    animation: (target) => ({
+      opacity: 1,
+      y: 0,
+      duration: 1
+    }),
+    initial: { opacity: 0, y: 50 },
+    start: 'top 80%',     // When to start animation
+    scrub: true          // Animation follows scroll position
+  });
+  
+  return <div ref={elementRef}>Scroll-animated content</div>;
+}
+```
+
+## Accessibility Features
+
+Version 2.0.0 introduces improved accessibility support:
+
+```jsx
+// Global settings in AnimationProvider
+<AnimationProvider settings={{
+  respectReducedMotion: true,  // Respect prefers-reduced-motion setting
+  lowPowerMode: true           // Reduce animation complexity on low power
+}}>
+  <App />
+</AnimationProvider>
+
+// Access settings anywhere
+import { useAnimationSettings } from 'react-gsap-animation-library';
+
+function AccessibilityControls() {
+  const { 
+    disableAllAnimations, 
+    updateSettings 
+  } = useAnimationSettings();
+  
+  return (
+    <button onClick={() => updateSettings({ disableAllAnimations: true })}>
+      Turn off animations
+    </button>
   );
 }
 ```
