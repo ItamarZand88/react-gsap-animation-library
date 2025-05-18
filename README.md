@@ -27,6 +27,7 @@ This major update brings significant improvements:
 - Improved animation performance and code organization
 - Better accessibility support including reduced motion preferences
 - Simplified API with more powerful features
+- New components like `TypingText` for typewriter effects
 
 ## Installation
 
@@ -45,6 +46,7 @@ import {
   FadeIn, 
   SlideIn, 
   TextReveal,
+  TypingText,
   AnimatedButton 
 } from 'react-gsap-animation-library';
 
@@ -68,6 +70,12 @@ function App() {
           Revealing text with a mask effect
         </TextReveal>
         
+        <TypingText 
+          text={["Hello!", "Welcome to React GSAP Animation Library", "Try it now!"]} 
+          typingSpeed={15}
+          loop={Infinity}
+        />
+        
         <AnimatedButton effect="ripple" effectColor="rgba(255, 255, 255, 0.5)">
           Click Me!
         </AnimatedButton>
@@ -90,10 +98,11 @@ function App() {
       defaultDuration: 0.8,        // Default animation duration
       defaultEase: 'power3.out',   // Default easing function
       disableScrollAnimations: false,  // Disable all scroll-triggered animations
-      disableAllAnimations: false,     // Disable all animations completely
-      animationQuality: 'high'         // 'low', 'medium', 'high'
+      disableAllAnimations: false,     // Disable all animations
+      respectReducedMotion: true,      // Respect prefers-reduced-motion setting
+      lowPowerMode: false              // Reduce animation complexity for battery savings
     }}>
-      {/* Your app content */}
+      <YourApp />
     </AnimationProvider>
   );
 }
@@ -102,241 +111,286 @@ function App() {
 function MyComponent() {
   const { 
     disableAllAnimations,
-    updateSettings 
+    defaultDuration,
+    updateSettings
   } = useAnimationSettings();
   
-  // Toggle animations on/off
-  const toggleAnimations = () => {
-    updateSettings({ disableAllAnimations: !disableAllAnimations });
+  // You can update settings programmatically
+  const disableAnimations = () => {
+    updateSettings({ disableAllAnimations: true });
   };
   
   return (
     <div>
-      <button onClick={toggleAnimations}>
-        {disableAllAnimations ? 'Enable' : 'Disable'} Animations
-      </button>
+      <button onClick={disableAnimations}>Disable Animations</button>
     </div>
   );
 }
 ```
 
-## Components
+## Core Components
 
-### Basic Animation Components
+### FadeIn
 
-#### `FadeIn`
-
-Fades in elements with directional options.
+Fade in elements with optional directional movement.
 
 ```jsx
 <FadeIn 
-  duration={0.8} 
-  delay={0} 
-  threshold={0.2}
-  direction="up" // 'up', 'down', 'left', 'right', 'none'
-  trigger="scroll" // 'scroll', 'load', 'none', 'hover', 'click'
-  onComplete={() => console.log('Animation completed')}
+  direction="up"        // 'up', 'down', 'left', 'right', 'none'
+  duration={0.8}        // Animation duration in seconds
+  delay={0.2}           // Delay before animation starts
+  distance={30}         // Movement distance in pixels
+  ease="power3.out"     // GSAP easing function
+  trigger="load"        // 'load', 'scroll', 'none' (manual control)
+  threshold={0.1}       // Viewport threshold for scroll animations
+  stagger={0.1}         // Stagger delay for child elements
+  onComplete={() => {}} // Callback when animation completes
 >
-  <h2>I will fade in!</h2>
+  <div>Content to animate</div>
 </FadeIn>
 ```
 
-#### `SlideIn`
+### SlideIn
 
-Slides elements in from a specified direction with optional bounce effect.
+Slide elements into view with optional bounce effect.
 
 ```jsx
 <SlideIn 
-  direction="left" // 'left', 'right', 'up', 'down'
-  distance={100} 
-  duration={0.8}
-  bounce={true}
-  fade={true} // Fade in while sliding
-  trigger="scroll"
+  direction="left"       // 'up', 'down', 'left', 'right'
+  duration={0.8}         // Animation duration in seconds
+  delay={0}              // Delay before animation starts
+  distance={100}         // Movement distance in pixels
+  ease="power2.out"      // GSAP easing function
+  bounce={true}          // Add bounce effect
+  bounceIntensity={0.3}  // Strength of bounce (0-1)
+  trigger="scroll"       // 'load', 'scroll', 'none' (manual control)
+  threshold={0.2}        // Viewport threshold for scroll animations
 >
-  <div>I slide in from the left!</div>
+  <div>Sliding content</div>
 </SlideIn>
 ```
 
-### Text Animation Components
+### TextReveal
 
-#### `TextReveal`
-
-Reveals text with customizable mask effects.
+Reveal text with a mask effect.
 
 ```jsx
 <TextReveal 
-  duration={1.2}
-  direction="left" // 'left', 'right', 'top', 'bottom'
-  backgroundColor="#000"
-  textColor="inherit"
-  maskStyle="solid" // 'solid', 'gradient', 'split'
-  trigger="scroll"
+  direction="left"          // 'left', 'right', 'top', 'bottom'
+  duration={1.2}            // Animation duration in seconds
+  delay={0.1}               // Delay before animation starts
+  ease="power4.inOut"       // GSAP easing function
+  backgroundColor="#3498db" // Mask color
+  textColor="#ffffff"       // Text color
+  maskStyle="solid"         // 'solid', 'gradient', 'split'
+  trigger="scroll"          // 'load', 'scroll', 'none' (manual control)
+  threshold={0.3}           // Viewport threshold for scroll animations
 >
-  This text will be revealed dramatically!
+  Text to reveal with mask effect
 </TextReveal>
 ```
 
-### Interactive Components
+### TypingText
 
-#### `AnimatedButton`
+Create typewriter-like text animations.
 
-A button with various animation effects.
+```jsx
+<TypingText 
+  text="Single text to type"  // String or array of strings to type
+  // text={["First text", "Second text"]}  // Multiple texts
+  typingSpeed={10}            // Characters per second
+  deleteSpeed={5}             // Delete speed (for multiple texts)
+  delayBetweenTexts={1.5}     // Delay between different texts
+  startDelay={0.5}            // Initial delay before typing starts
+  cursorBlink={true}          // Enable cursor blinking
+  cursorChar="|"              // Character to use as cursor
+  cursorColor="inherit"       // Cursor color
+  trigger="load"              // 'load', 'scroll', 'none' (manual control)
+  loop={0}                    // Number of loops (0 = no loop, Infinity = infinite)
+/>
+```
+
+### AnimatedButton
+
+Enhanced button with hover and click animations.
 
 ```jsx
 <AnimatedButton 
-  effect="ripple" // 'ripple', 'shine', 'pulse', 'scale', 'fill'
-  effectColor="rgba(255, 255, 255, 0.4)"
-  duration={0.6}
-  asChild={false} // Set to true to use children as the button
+  effect="scale"              // 'scale', 'ripple', 'glow', 'magnetic'
+  duration={0.3}              // Animation duration
+  effectColor="rgba(255,255,255,0.5)" // Effect color for ripple/glow
+  hoverScale={1.05}           // Scale on hover
+  clickScale={0.95}           // Scale on click
+  ease="power2.out"           // Easing function
+  className="custom-button"   // Additional class names
+  style={{}}                  // Custom inline styles
+  onClick={() => {}}          // Click handler
 >
   Click Me!
 </AnimatedButton>
-
-// Using as a wrapper for custom elements
-<AnimatedButton effect="shine" asChild={true}>
-  <div className="custom-button">
-    Custom Element
-  </div>
-</AnimatedButton>
 ```
 
-## Hooks
+## Custom Hooks
 
-### `useAnimation`
+### useAnimation
 
-Wrapper around GSAP's `useGSAP` hook for consistent API:
+Create GSAP animations with proper context handling:
 
 ```jsx
 import { useAnimation } from 'react-gsap-animation-library';
-import gsap from 'gsap';
 
 function MyComponent() {
-  const { contextSafe } = useAnimation(() => {
-    gsap.to('.element', { opacity: 1, duration: 1 });
-  }, { 
-    scope: containerRef,
-    dependencies: [someProp],
-    revertOnUpdate: true
-  });
+  const elementRef = useRef(null);
   
-  // Create context-safe event handlers
-  const handleClick = contextSafe(() => {
-    gsap.to('.element', { scale: 1.2 });
-  });
+  // Create a GSAP animation with proper context
+  const { tween, timeline, add, contextSafe } = useAnimation();
   
-  return (
-    <div ref={containerRef}>
-      <button onClick={handleClick}>Animate</button>
-      <div className="element">Content</div>
-    </div>
-  );
+  useEffect(() => {
+    // Create a tween - automatically cleaned up on unmount
+    tween(elementRef.current, {
+      x: 100,
+      duration: 1,
+      ease: 'power2.out'
+    });
+    
+    // Or create a timeline
+    const tl = timeline();
+    tl.to(elementRef.current, { x: 100, duration: 1 })
+      .to(elementRef.current, { y: 50, duration: 0.5 });
+    
+    // Make event handlers context-safe
+    const onHover = contextSafe(() => {
+      tween(elementRef.current, { scale: 1.2, duration: 0.3 });
+    });
+    
+    elementRef.current.addEventListener('mouseenter', onHover);
+    
+    // Event listeners using contextSafe are automatically cleaned up
+  }, []);
+  
+  return <div ref={elementRef}>Animated element</div>;
 }
 ```
 
-### `useAnimationEffect`
+### useAnimationEffect
 
-Simplified hook for common animation patterns:
+Simplified API for common effects:
 
 ```jsx
 import { useAnimationEffect } from 'react-gsap-animation-library';
 
 function MyComponent() {
-  const { ref, contextSafe } = useAnimationEffect({
-    animation: (containerRef) => {
-      gsap.from(containerRef.current, { opacity: 0, y: 30 });
-    },
-    dependencies: [someProp],
-    revertOnUpdate: true
+  const elementRef = useRef(null);
+  
+  // Apply a predefined animation effect
+  useAnimationEffect(elementRef, {
+    effect: 'fadeIn',     // 'fadeIn', 'fadeOut', 'slideIn', etc.
+    direction: 'up',      // Direction for effects that support it
+    duration: 0.8,        // Duration in seconds
+    delay: 0.2,           // Delay in seconds
+    trigger: 'scroll',    // 'load', 'scroll', 'none'
+    threshold: 0.2        // Viewport threshold for scroll
   });
   
-  return <div ref={ref}>Animated content</div>;
+  return <div ref={elementRef}>Element with effects</div>;
 }
 ```
 
-### `useScrollTrigger`
+### useScrollTrigger
 
-Helper hook for ScrollTrigger animations:
+Create scroll-based animations:
 
 ```jsx
 import { useScrollTrigger } from 'react-gsap-animation-library';
-import { useRef } from 'react';
 
-function MyComponent() {
-  const triggerRef = useRef(null);
-  const animation = gsap.timeline();
+function MyScrollAnimation() {
+  const elementRef = useRef(null);
   
-  animation.to('.element', { opacity: 1, y: 0 });
-  
-  useScrollTrigger({
-    trigger: triggerRef,
-    animation: animation,
-    start: "top center",
-    markers: true,
-    scrub: 0.5,
-    pin: true,
-    onEnter: () => console.log('Entered view')
+  // Create a ScrollTrigger animation
+  useScrollTrigger(elementRef, {
+    animation: (target) => ({
+      opacity: 1,
+      y: 0,
+      duration: 1
+    }),
+    initial: { opacity: 0, y: 50 },   // Initial state
+    scrub: true,                      // Animate with scroll position
+    start: 'top 80%',                 // ScrollTrigger start position
+    end: 'bottom 20%',                // ScrollTrigger end position
+    markers: false,                   // Show markers (debug)
+    pin: false,                       // Pin element during animation
+    toggleActions: 'play none none reverse'  // ScrollTrigger toggle actions
   });
   
+  return <div ref={elementRef}>Scroll-animated content</div>;
+}
+```
+
+## Advanced Usage
+
+### Staggered Animations
+
+```jsx
+import { FadeIn } from 'react-gsap-animation-library';
+
+function StaggeredItems() {
   return (
-    <div ref={triggerRef}>
-      <div className="element">Scroll-animated content</div>
+    <FadeIn 
+      stagger={0.1} 
+      childClassName="stagger-item"
+      direction="up"
+      distance={20}
+    >
+      <div className="stagger-item">Item 1</div>
+      <div className="stagger-item">Item 2</div>
+      <div className="stagger-item">Item 3</div>
+      <div className="stagger-item">Item 4</div>
+    </FadeIn>
+  );
+}
+```
+
+### Combined Animations
+
+```jsx
+import { useAnimation } from 'react-gsap-animation-library';
+
+function CombinedEffects() {
+  const containerRef = useRef(null);
+  const { timeline } = useAnimation();
+  
+  useEffect(() => {
+    const tl = timeline();
+    
+    tl.from(containerRef.current, { opacity: 0, duration: 1 })
+      .from('.title', { y: 50, opacity: 0, duration: 0.5 }, '-=0.5')
+      .from('.content', { scale: 0.9, opacity: 0, duration: 0.5 }, '-=0.3')
+      .from('.button', { y: 20, opacity: 0, duration: 0.3 }, '-=0.2');
+  }, []);
+  
+  return (
+    <div ref={containerRef}>
+      <h1 className="title">Combined Animations</h1>
+      <p className="content">Content with sequential animation</p>
+      <button className="button">Animated Button</button>
     </div>
   );
 }
 ```
 
-## Render Props Pattern
-
-All components support a render props pattern for more control:
-
-```jsx
-<FadeIn>
-  {({ play }) => (
-    <div>
-      <h2>Manual control</h2>
-      <button onClick={play}>Trigger Animation</button>
-    </div>
-  )}
-</FadeIn>
-```
-
-## Accessibility
-
-The library respects the user's accessibility preferences:
-
-- Automatically detects and respects the `prefers-reduced-motion` setting
-- Adapts to low-end devices and low battery scenarios
-- Allows complete disabling of animations via context
-- Provides sensible defaults for a better user experience
-
-## Server-Side Rendering (SSR)
-
-The library is compatible with server-side rendering frameworks like Next.js. All components properly handle SSR environments by:
-
-1. Detecting the environment and avoiding client-only code on the server
-2. Properly initializing animations after hydration
-3. Respecting user preferences like reduced motion
-
 ## Browser Support
 
-- Chrome/Edge: Latest versions
-- Firefox: Latest versions
-- Safari: 11+
-- IE: Not supported
-
-## Migration from v1.x
-
-See the [Migration Guide](MIGRATION.md) for detailed instructions on upgrading from version 1.x.
-
-## License
-
-MIT © Itamar Zand
+- Chrome 60+
+- Firefox 54+
+- Safari 10.1+
+- Edge 15+
+- iOS Safari 10.3+
+- Android Browser 67+
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/ItamarZand88/react-gsap-animation-library/issues).
+Contributions are welcome! Please feel free to submit a Pull Request.
 
----
+## License
 
-Built with GSAP and ❤️ by [Itamar Zand](https://github.com/ItamarZand88)
+This project is licensed under the MIT License - see the LICENSE file for details.

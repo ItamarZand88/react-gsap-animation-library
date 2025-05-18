@@ -9,12 +9,17 @@ import { useAnimation, useAnimationEffect, useScrollTrigger } from './utils/useA
 // Basic components
 import FadeIn from './components/basic/FadeIn.jsx';
 import SlideIn from './components/basic/SlideIn.jsx';
+import SimpleAnimated from './components/basic/SimpleAnimated.jsx';
 
 // Text components
 import TextReveal from './components/text/TextReveal.jsx';
+import TypingText from './components/text/TypingText.jsx';
 
 // Interactive components
 import AnimatedButton from './components/interactive/AnimatedButton.jsx';
+
+// Utility functions
+import * as animations from './utils/animations.js';
 
 // Register GSAP plugins
 import gsap from 'gsap';
@@ -57,12 +62,17 @@ export {
   // Basic components
   FadeIn,
   SlideIn,
+  SimpleAnimated,
   
   // Text components
   TextReveal,
+  TypingText,
   
   // Interactive components
   AnimatedButton,
+  
+  // Utility functions
+  animations,
   
   // Library info
   version,
@@ -83,12 +93,17 @@ export default {
   // Basic components
   FadeIn,
   SlideIn,
+  SimpleAnimated,
   
   // Text components
   TextReveal,
+  TypingText,
   
   // Interactive components
   AnimatedButton,
+  
+  // Utility functions
+  animations,
   
   // Library info
   version,
