@@ -1,0 +1,39 @@
+# Tests
+/tests
+/coverage
+/test-results
+
+# Examples and docs
+/examples
+/docs
+*.md
+!README.md
+!LICENSE
+
+# Build configuration
+rollup.config.js
+tsconfig.json
+jest.config.js
+babel.config.js
+.eslintrc
+.prettierrc
+
+# Source control
+.git
+.gitignore
+.github
+
+# IDE files
+.idea
+.vscode
+*.sublime-*
+
+# Misc
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+.env*
+PUBLISHING.md
+TESTING.md
