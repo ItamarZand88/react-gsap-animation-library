@@ -3,13 +3,8 @@
  * Run with: node rename-jsx-files.js
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Get current directory name since __dirname isn't available in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const fs = require('fs');
+const path = require('path');
 
 // Path to components directory
 const componentsDir = path.join(__dirname, 'src', 'components');
@@ -41,10 +36,10 @@ try {
   if (fs.existsSync(indexPath)) {
     let indexContent = fs.readFileSync(indexPath, 'utf8');
     
-    // Replace all imports from './components/Component' to './components/Component.jsx'
+    // Replace all imports from './components/Component.js' to './components/Component.jsx'
     jsFiles.forEach(file => {
       const componentName = file.replace('.js', '');
-      const oldImport = `./components/${componentName}`;
+      const oldImport = `./components/${componentName}.js`;
       const newImport = `./components/${componentName}.jsx`;
       
       indexContent = indexContent.replace(new RegExp(oldImport, 'g'), newImport);
