@@ -5,10 +5,9 @@
  * node tests/import-test.js
  */
 
+import * as lib from '../dist/index.js';
+
 try {
-  // Try to import the library
-  const lib = require('../dist/index');
-  
   // Check if the components exist
   const components = [
     'FadeIn',
