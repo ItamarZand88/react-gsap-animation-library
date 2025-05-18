@@ -1,10 +1,10 @@
 # React GSAP Animation Library
 
-![Version](https://img.shields.io/badge/version-1.0.1-blue)
+![Version](https://img.shields.io/badge/version-1.0.2-blue)
 ![React](https://img.shields.io/badge/React-16.8%2B-61DAFB)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A comprehensive and easy-to-use React animation library built on top of GSAP (GreenSock Animation Platform) that provides beautiful, performant animations with minimal setup.
+A comprehensive and easy-to-use React animation library built on top of GSAP (GreenSock Animation Platform) that provides beautiful, performant animations with multiple fallback layers.
 
 ## Features
 
@@ -12,9 +12,11 @@ A comprehensive and easy-to-use React animation library built on top of GSAP (Gr
 - ⚙️ **Customizable**: Extensive options for customizing animations
 - 📱 **Responsive**: Works great on all device sizes
 - 🔄 **Scroll-based animations**: Trigger animations as elements enter the viewport
-- 🐞 **Fallback support**: CSS animations fallback when GSAP isn't available
-- 🔌 **Zero dependencies**: No external dependencies (GSAP is a peer dependency)
-- 📦 **Lightweight**: Only import what you need
+- 🐞 **Robust fallbacks**: Three layers of fallbacks (GSAP, Web Animations API, CSS animations) 
+- 🛡️ **Fault-tolerant**: Smooth operation even when GSAP is unavailable or loading fails
+- 📦 **Independent components**: Each component works without depending on others
+- 🎛️ **Central configuration**: Global animation settings through context
+- 🌐 **SSR Support**: Proper functioning in server-side rendering environments
 
 ## Installation
 
@@ -24,26 +26,76 @@ npm install react-gsap-animation-library gsap
 yarn add react-gsap-animation-library gsap
 ```
 
-> Note: This library uses GSAP as a peer dependency to avoid version conflicts and reduce bundle size.
+> Note: GSAP is a peer dependency, but all components include fallbacks if GSAP isn't available.
 
 ## Quick Start
 
 ```jsx
 import React from 'react';
-import { FadeIn, SlideIn, AnimatedButton } from 'react-gsap-animation-library';
+import { 
+  AnimationProvider, 
+  FadeIn, 
+  SlideIn, 
+  AnimatedButton 
+} from 'react-gsap-animation-library';
 
 function App() {
   return (
-    <div className="app">
-      <FadeIn duration={1} delay={0.2}>
-        <h1>Hello Animation World!</h1>
-      </FadeIn>
-      
-      <SlideIn direction="right" distance={100}>
-        <p>This text slides in from the right</p>
-      </SlideIn>
-      
-      <AnimatedButton>Click Me!</AnimatedButton>
+    <AnimationProvider>
+      <div className="app">
+        <FadeIn duration={1} delay={0.2}>
+          <h1>Hello Animation World!</h1>
+        </FadeIn>
+        
+        <SlideIn direction="right" distance={100}>
+          <p>This text slides in from the right</p>
+        </SlideIn>
+        
+        <AnimatedButton effect="ripple">Click Me!</AnimatedButton>
+      </div>
+    </AnimationProvider>
+  );
+}
+```
+
+## Global Animation Settings
+
+The library provides a context provider for global animation settings:
+
+```jsx
+import { AnimationProvider, useAnimationSettings } from 'react-gsap-animation-library';
+
+function App() {
+  return (
+    <AnimationProvider settings={{
+      defaultDuration: 0.8,
+      defaultEase: 'power3.out',
+      disableScrollAnimations: false,
+      animationQuality: 'high' // 'low', 'medium', 'high'
+    }}>
+      {/* Your app content */}
+    </AnimationProvider>
+  );
+}
+
+// Access settings in any component
+function MyComponent() {
+  const { 
+    gsapAvailable, 
+    disableAllAnimations,
+    updateSettings 
+  } = useAnimationSettings();
+  
+  // Toggle animations on/off
+  const toggleAnimations = () => {
+    updateSettings({ disableAllAnimations: !disableAllAnimations });
+  };
+  
+  return (
+    <div>
+      <button onClick={toggleAnimations}>
+        {disableAllAnimations ? 'Enable' : 'Disable'} Animations
+      </button>
     </div>
   );
 }
@@ -51,20 +103,23 @@ function App() {
 
 ## Components
 
-The library includes the following components:
+The library includes the following components organized by category:
 
 ### Basic Animation Components
 
 #### `FadeIn`
 
-Fades in elements as they enter the viewport.
+Fades in elements with directional options.
 
 ```jsx
 <FadeIn 
   duration={0.8} 
   delay={0} 
   threshold={0.2}
-  trigger="scroll" // 'scroll', 'load', or 'none'
+  direction="up" // 'up', 'down', 'left', 'right', 'none'
+  trigger="scroll" // 'scroll', 'load', 'none', 'hover', 'click'
+  onStart={() => console.log('Animation started')}
+  onComplete={() => console.log('Animation completed')}
 >
   <h2>I will fade in!</h2>
 </FadeIn>
@@ -72,13 +127,14 @@ Fades in elements as they enter the viewport.
 
 #### `SlideIn`
 
-Slides elements in from a specified direction.
+Slides elements in from a specified direction with optional bounce effect.
 
 ```jsx
 <SlideIn 
-  direction="left" // 'left', 'right', 'top', 'bottom'
+  direction="left" // 'left', 'right', 'up', 'down'
   distance={100} 
   duration={0.8}
+  bounce={true}
   trigger="scroll"
 >
   <div>I slide in from the left!</div>
@@ -87,58 +143,32 @@ Slides elements in from a specified direction.
 
 #### `SimpleAnimated`
 
-A basic animated component that uses CSS animations (no GSAP dependency).
+A CSS-only animated component (no GSAP dependency).
 
 ```jsx
 <SimpleAnimated 
-  animation="fade" // 'fade', 'slide-left', 'slide-right', 'slide-up', 'slide-down', 'scale', 'rotate'
+  animationType="fadeIn" // 'fadeIn', 'fadeInUp', 'slideInLeft', 'bounce', 'pulse', etc.
   duration={0.5}
-  trigger="auto" // 'auto', 'hover', 'click', 'visible'
+  trigger="scroll" // 'scroll', 'load', 'none', 'hover', 'click'
 >
   <p>Simple CSS animation!</p>
 </SimpleAnimated>
-```
-
-### Interactive Components
-
-#### `AnimatedButton`
-
-A button with hover animation effects.
-
-```jsx
-<AnimatedButton 
-  duration={0.3}
-  hover={{ scale: 1.05 }}
->
-  Click Me!
-</AnimatedButton>
-```
-
-#### `AnimatedCard`
-
-A card component with hover and entrance animations.
-
-```jsx
-<AnimatedCard 
-  hover={{ y: -10, scale: 1.03 }}
-  entrance={{ y: 30, opacity: 0 }}
->
-  <h3>Card Title</h3>
-  <p>Card content goes here...</p>
-</AnimatedCard>
 ```
 
 ### Text Animation Components
 
 #### `TextReveal`
 
-Reveals text with a mask effect.
+Reveals text with customizable mask effects.
 
 ```jsx
 <TextReveal 
-  duration={1}
-  direction="right" // 'left', 'right', 'top', 'bottom'
-  color="black"
+  duration={1.2}
+  direction="left" // 'left', 'right', 'top', 'bottom'
+  backgroundColor="#000"
+  textColor="inherit"
+  maskStyle="solid" // 'solid', 'gradient', 'split'
+  trigger="scroll"
 >
   This text will be revealed dramatically!
 </TextReveal>
@@ -152,51 +182,57 @@ Animates individual characters, words, or lines of text.
 <SplitText 
   type="chars" // 'chars', 'words', 'lines'
   stagger={0.05}
+  animation="fadeUp" // 'fade', 'blur', 'slideUp', etc.
 >
   This text animates character by character!
 </SplitText>
 ```
 
-### Scroll-Based Components
+### Interactive Components
 
-#### `ParallaxSection`
+#### `AnimatedButton`
 
-Creates a parallax effect for its children.
+A button with various animation effects.
 
 ```jsx
-<ParallaxSection speed={0.5}>
-  <div className="parallax-content">
-    Content that moves with parallax effect
-  </div>
-</ParallaxSection>
+<AnimatedButton 
+  effect="ripple" // 'ripple', 'shine', 'pulse', 'scale', 'fill'
+  effectColor="rgba(255, 255, 255, 0.4)"
+  duration={0.6}
+  trigger="hover" // 'hover', 'click', 'none'
+  asChild={false} // Set to true to use children as the button
+>
+  Click Me!
+</AnimatedButton>
 ```
 
-#### `ScrollTriggeredTimeline`
+#### `AnimatedCard`
 
-Creates complex animations tied to scroll position.
+A card component with hover and entrance animations.
 
 ```jsx
-<ScrollTriggeredTimeline
-  animations={[
-    { target: '.element1', props: { x: 100 }, position: 0 },
-    { target: '.element2', props: { opacity: 1 }, position: 0.5 }
-  ]}
+<AnimatedCard 
+  effect="tilt" // 'tilt', 'lift', 'glow', 'border', 'shadow'
+  intensity={0.5}
+  entrance={{ y: 30, opacity: 0 }}
 >
-  <div className="element1">First element</div>
-  <div className="element2">Second element</div>
-</ScrollTriggeredTimeline>
+  <h3>Card Title</h3>
+  <p>Card content goes here...</p>
+</AnimatedCard>
 ```
 
 ### Effect Components
 
 #### `ScrollProgress`
 
-Shows scroll progress as a bar at the top of the page.
+Shows scroll progress with customizable styles.
 
 ```jsx
 <ScrollProgress 
   height="5px" 
   color="#ff0000"
+  position="top" // 'top', 'bottom', 'left', 'right'
+  indicator={true} // Show section indicators
 />
 ```
 
@@ -205,102 +241,80 @@ Shows scroll progress as a bar at the top of the page.
 Creates a magnetic effect, pulling elements toward the cursor.
 
 ```jsx
-<MagneticElement strength={0.5}>
+<MagneticElement 
+  strength={0.5}
+  radius={100}
+  type="attract" // 'attract', 'repel'
+  cumulativeEffect={false}
+>
   <button>Magnetic Button</button>
 </MagneticElement>
 ```
 
-#### `AnimatedCursor`
+## Fallback Mechanisms
 
-Customizes the cursor with animated effects.
+The library implements three layers of fallbacks:
 
-```jsx
-<AnimatedCursor 
-  color="#ff0000"
-  size={20}
-/>
-```
+1. **GSAP (Primary)**: When available, uses GSAP for the best animation quality
+2. **Web Animation API (Secondary)**: Falls back to the Web Animation API if GSAP fails
+3. **CSS Animations (Tertiary)**: Ultimate fallback to ensure animations always work
 
-## Advanced Usage
+These layers are automatically managed, so you don't need to worry about compatibility issues.
 
-### Using Hooks
+## Safe Animation Hook
 
-The library provides several hooks for more control over animations:
-
-#### `useAnimation`
+For custom animations, use the `useSafeAnimation` hook:
 
 ```jsx
-import { hooks } from 'react-gsap-animation-library';
-const { useAnimation } = hooks;
+import { useSafeAnimation } from 'react-gsap-animation-library';
 
 function MyComponent() {
-  const { ref, play, reset, isAnimating } = useAnimation({
-    type: 'fade',
-    duration: 0.5,
-    trigger: 'none' // Manual trigger
-  });
+  const elementRef = useRef(null);
+  const { animate, isGsapAvailable } = useSafeAnimation(elementRef);
+  
+  const playAnimation = () => {
+    animate({
+      from: {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: 'power3.out'
+      }
+    });
+  };
   
   return (
     <div>
-      <div ref={ref}>This element will animate</div>
-      <button onClick={play}>Play Animation</button>
-      <button onClick={reset}>Reset</button>
+      <div ref={elementRef}>This element will animate</div>
+      <button onClick={playAnimation}>Play Animation</button>
     </div>
   );
 }
-```
-
-#### `useInView`
-
-```jsx
-import { hooks } from 'react-gsap-animation-library';
-const { useInView } = hooks;
-
-function MyComponent() {
-  const { ref, isInView } = useInView({
-    threshold: 0.5,
-    onEnter: () => console.log('Element entered viewport')
-  });
-  
-  return (
-    <div ref={ref} style={{ opacity: isInView ? 1 : 0 }}>
-      I'll become visible when in view
-    </div>
-  );
-}
-```
-
-### Using Utilities
-
-#### Animation Functions
-
-```jsx
-import { animations } from 'react-gsap-animation-library';
-
-// Later in your code
-animations.fadeIn(element, { duration: 1 });
-animations.slideIn(element, { direction: 'left', distance: 100 });
-```
-
-#### Easing Functions
-
-```jsx
-import { easings } from 'react-gsap-animation-library';
-
-// Use in GSAP animations
-gsap.to(element, {
-  x: 100,
-  ease: easings.softBack
-});
 ```
 
 ## Server-Side Rendering (SSR)
 
-The library is compatible with server-side rendering frameworks like Next.js. When used in SSR environments, animations are properly deferred until the client-side hydration is complete.
+The library is compatible with server-side rendering frameworks like Next.js. All components properly handle SSR environments by:
 
-## Fallback Behavior
+1. Detecting the environment and avoiding client-only code on the server
+2. Properly initializing animations after hydration
+3. Respecting user preferences like reduced motion
 
-If GSAP is not available, the library will automatically fallback to CSS-based animations for core functionality. This ensures that your animations will still work, even if there are issues loading GSAP.
+## Accessibility
+
+The library respects the user's accessibility preferences:
+
+- Automatically detects and respects the `prefers-reduced-motion` setting
+- Adapts to low-end devices and low battery scenarios
+- Allows complete disabling of animations via context
+
+## Performance
+
+To ensure good performance, the library:
+
+- Only animates elements when they're visible (using IntersectionObserver)
+- Avoids layout thrashing by batching animations
+- Provides quality settings for lower-end devices
 
 ## Browser Support
 
