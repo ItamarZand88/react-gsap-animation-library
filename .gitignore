@@ -6,6 +6,7 @@
 
 # Testing
 /coverage
+/test-results
 
 # IDE files
 .idea
@@ -25,3 +26,7 @@ yarn-error.log*
 
 # Mac OS
 .DS_Store
+
+# NPM
+.npmrc
+.npm
