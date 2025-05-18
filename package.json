@@ -5,14 +5,13 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "type": "module",
   "scripts": {
     "build": "rollup -c",
     "start": "rollup -c -w",
     "test": "jest",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
-    "test:import": "node tests/import-test.js"
+    "test:import": "node tests/import-test.mjs"
   },
   "files": [
     "dist",
