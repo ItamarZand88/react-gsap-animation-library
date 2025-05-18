@@ -1,184 +1,219 @@
-// Reusable animation presets
-import { gsap } from 'gsap';
-import * as easings from './easings';
+/**
+ * Animation utility functions
+ * These functions provide a simpler way to create GSAP animations
+ * New implementation using GSAP's recommended patterns
+ */
 
-// Entry animations
+import gsap from 'gsap';
+
+/**
+ * Create a fade in animation
+ * 
+ * @param {HTMLElement|string} element - DOM element or selector
+ * @param {Object} options - Animation options
+ * @param {number} options.duration - Animation duration in seconds
+ * @param {number} options.delay - Animation delay in seconds
+ * @param {string} options.ease - GSAP easing function
+ * @param {string} options.direction - Fade direction ('up', 'down', 'left', 'right', 'none')
+ * @param {number} options.distance - Distance to animate from in pixels (for directional fades)
+ * @param {Function} options.onComplete - Callback function when animation completes
+ * @returns {gsap.core.Tween} The GSAP animation object
+ */
 export const fadeIn = (element, options = {}) => {
-  const { duration = 0.8, delay = 0, ease = "power3.out", from = { opacity: 0, y: 20 } } = options;
+  const { 
+    duration = 0.8, 
+    delay = 0, 
+    ease = 'power3.out',
+    direction = 'up',
+    distance = 30,
+    onComplete
+  } = options;
   
+  // Set up from properties based on direction
+  const from = { opacity: 0 };
+  
+  if (direction === 'up') from.y = distance;
+  else if (direction === 'down') from.y = -distance;
+  else if (direction === 'left') from.x = -distance;
+  else if (direction === 'right') from.x = distance;
+  
+  // Create and return the animation
   return gsap.from(element, {
     ...from,
     duration,
     delay,
     ease,
-    clearProps: "all"
+    onComplete,
+    clearProps: 'all'
   });
 };
 
-export const bounceIn = (element, options = {}) => {
-  const { duration = 1, delay = 0, scale = 0.3 } = options;
-  
-  return gsap.from(element, {
-    opacity: 0,
-    scale,
-    duration,
-    delay,
-    ease: easings.bounceOut,
-    clearProps: "all"
-  });
-};
-
-export const slideIn = (element, options = {}) => {
-  const { duration = 0.8, delay = 0, direction = 'left', distance = 100, ease = "power3.out" } = options;
-  
-  let from = { opacity: 0 };
-  
-  switch(direction) {
-    case 'left':
-      from.x = -distance;
-      break;
-    case 'right':
-      from.x = distance;
-      break;
-    case 'top':
-      from.y = -distance;
-      break;
-    case 'bottom':
-      from.y = distance;
-      break;
-    default:
-      from.x = -distance;
-  }
-  
-  return gsap.from(element, {
-    ...from,
-    duration,
-    delay,
-    ease,
-    clearProps: "all"
-  });
-};
-
-export const rotateIn = (element, options = {}) => {
-  const { duration = 1, delay = 0, rotation = 360, ease = "power2.out" } = options;
-  
-  return gsap.from(element, {
-    opacity: 0,
-    rotation,
-    scale: 0.5,
-    duration,
-    delay,
-    ease,
-    clearProps: "all"
-  });
-};
-
-// Attention animations
-export const pulse = (element, options = {}) => {
-  const { duration = 0.5, scale = 1.05 } = options;
-  
-  return gsap.to(element, {
-    scale,
-    duration: duration / 2,
-    ease: "power2.inOut",
-    yoyo: true,
-    repeat: 1
-  });
-};
-
-export const shake = (element, options = {}) => {
-  const { duration = 0.6, distance = 10 } = options;
-  
-  return gsap.to(element, {
-    x: distance,
-    duration: duration / 4,
-    ease: "power1.inOut",
-    yoyo: true,
-    repeat: 3
-  });
-};
-
-// Exit animations
+/**
+ * Create a fade out animation
+ * 
+ * @param {HTMLElement|string} element - DOM element or selector
+ * @param {Object} options - Animation options
+ * @param {number} options.duration - Animation duration in seconds
+ * @param {number} options.delay - Animation delay in seconds
+ * @param {string} options.ease - GSAP easing function
+ * @param {string} options.direction - Fade direction ('up', 'down', 'left', 'right', 'none')
+ * @param {number} options.distance - Distance to animate to in pixels (for directional fades)
+ * @param {Function} options.onComplete - Callback function when animation completes
+ * @returns {gsap.core.Tween} The GSAP animation object
+ */
 export const fadeOut = (element, options = {}) => {
-  const { duration = 0.8, delay = 0, ease = "power3.in", to = { opacity: 0, y: -20 } } = options;
+  const { 
+    duration = 0.8, 
+    delay = 0, 
+    ease = 'power3.out',
+    direction = 'down',
+    distance = 30,
+    onComplete
+  } = options;
   
+  // Set up to properties based on direction
+  const to = { opacity: 0 };
+  
+  if (direction === 'up') to.y = -distance;
+  else if (direction === 'down') to.y = distance;
+  else if (direction === 'left') to.x = -distance;
+  else if (direction === 'right') to.x = distance;
+  
+  // Create and return the animation
   return gsap.to(element, {
     ...to,
     duration,
     delay,
-    ease
+    ease,
+    onComplete
   });
 };
 
-// Hover effects
-export const hoverScale = (element, options = {}) => {
-  const { scale = 1.05, duration = 0.3 } = options;
+/**
+ * Create a slide animation
+ * 
+ * @param {HTMLElement|string} element - DOM element or selector
+ * @param {Object} options - Animation options
+ * @param {number} options.duration - Animation duration in seconds
+ * @param {number} options.delay - Animation delay in seconds
+ * @param {string} options.ease - GSAP easing function
+ * @param {string} options.direction - Slide direction ('up', 'down', 'left', 'right')
+ * @param {number} options.distance - Distance to animate from in pixels
+ * @param {boolean} options.fade - Whether to fade in while sliding
+ * @param {Function} options.onComplete - Callback function when animation completes
+ * @returns {gsap.core.Tween} The GSAP animation object
+ */
+export const slideIn = (element, options = {}) => {
+  const { 
+    duration = 0.8, 
+    delay = 0, 
+    ease = 'power3.out',
+    direction = 'up',
+    distance = 100,
+    fade = true,
+    onComplete
+  } = options;
   
-  const mouseEnterHandler = () => {
-    gsap.to(element, {
-      scale,
-      duration,
-      ease: "power2.out"
-    });
-  };
+  // Set up from properties based on direction
+  const from = fade ? { opacity: 0 } : {};
   
-  const mouseLeaveHandler = () => {
-    gsap.to(element, {
-      scale: 1,
-      duration,
-      ease: "power2.inOut"
-    });
-  };
+  if (direction === 'up') from.y = distance;
+  else if (direction === 'down') from.y = -distance;
+  else if (direction === 'left') from.x = -distance;
+  else if (direction === 'right') from.x = distance;
   
-  element.addEventListener('mouseenter', mouseEnterHandler);
-  element.addEventListener('mouseleave', mouseLeaveHandler);
-  
-  return {
-    cleanup: () => {
-      element.removeEventListener('mouseenter', mouseEnterHandler);
-      element.removeEventListener('mouseleave', mouseLeaveHandler);
-    }
-  };
+  // Create and return the animation
+  return gsap.from(element, {
+    ...from,
+    duration,
+    delay,
+    ease,
+    onComplete,
+    clearProps: 'all'
+  });
 };
 
-export const hoverTilt = (element, options = {}) => {
-  const { tiltAmount = 10, duration = 0.3 } = options;
+/**
+ * Create a text reveal animation
+ * 
+ * @param {Object} elements - Object containing DOM elements
+ * @param {HTMLElement} elements.container - Container element
+ * @param {HTMLElement} elements.text - Text element to reveal
+ * @param {HTMLElement} elements.mask - Mask element
+ * @param {Object} options - Animation options
+ * @param {number} options.duration - Animation duration in seconds
+ * @param {number} options.delay - Animation delay in seconds
+ * @param {string} options.ease - GSAP easing function
+ * @param {string} options.direction - Reveal direction ('left', 'right', 'top', 'bottom')
+ * @param {string} options.maskStyle - Mask style ('solid', 'gradient', 'split')
+ * @param {Function} options.onComplete - Callback function when animation completes
+ * @returns {gsap.core.Timeline} The GSAP timeline
+ */
+export const textReveal = (elements, options = {}) => {
+  const { 
+    duration = 1.2, 
+    delay = 0, 
+    ease = 'power4.inOut',
+    direction = 'left',
+    maskStyle = 'solid',
+    onComplete
+  } = options;
   
-  const mouseMoveHandler = (e) => {
-    const rect = element.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    
-    const rotateY = ((mouseX - centerX) / (rect.width / 2)) * tiltAmount;
-    const rotateX = -((mouseY - centerY) / (rect.height / 2)) * tiltAmount;
-    
-    gsap.to(element, {
-      rotateY,
-      rotateX,
-      transformPerspective: 1000,
-      duration: 0.1,
-      ease: "power2.out"
+  const { container, text, mask } = elements;
+  
+  if (!container || !text || !mask) {
+    console.error('textReveal: All elements (container, text, mask) are required');
+    return null;
+  }
+  
+  // Create a timeline
+  const tl = gsap.timeline({
+    delay,
+    onComplete
+  });
+  
+  // Determine properties based on direction and style
+  const isHorizontal = direction === 'left' || direction === 'right';
+  
+  // Set initial states
+  gsap.set(text, { opacity: 0 });
+  
+  if (maskStyle === 'split') {
+    // Split reveal animation (mask moves out)
+    tl.to(mask, {
+      [isHorizontal ? 'x' : 'y']: isHorizontal ? 
+        (direction === 'left' ? '100%' : '-100%') : 
+        (direction === 'top' ? '100%' : '-100%'),
+      duration: duration * 0.6,
+      ease
     });
-  };
-  
-  const mouseLeaveHandler = () => {
-    gsap.to(element, {
-      rotateX: 0,
-      rotateY: 0,
-      duration,
-      ease: "power2.inOut"
+  } else {
+    // Scale reveal animation (mask shrinks)
+    tl.to(mask, {
+      [isHorizontal ? 'scaleX' : 'scaleY']: 0,
+      duration: duration * 0.6,
+      ease,
+      transformOrigin: 
+        direction === 'left' ? 'right center' :
+        direction === 'right' ? 'left center' :
+        direction === 'top' ? 'center bottom' :
+        'center top'
     });
-  };
+  }
   
-  element.addEventListener('mousemove', mouseMoveHandler);
-  element.addEventListener('mouseleave', mouseLeaveHandler);
+  // Fade in text slightly before mask is fully gone
+  tl.to(text, {
+    opacity: 1,
+    duration: duration * 0.4,
+    ease: 'power2.out'
+  }, '-=0.25');
   
-  return {
-    cleanup: () => {
-      element.removeEventListener('mousemove', mouseMoveHandler);
-      element.removeEventListener('mouseleave', mouseLeaveHandler);
-    }
-  };
+  return tl;
+};
+
+export default {
+  fadeIn,
+  fadeOut,
+  slideIn,
+  textReveal
 };
