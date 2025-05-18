@@ -16,7 +16,8 @@
   "files": [
     "dist",
     "src",
-    "LICENSE"
+    "LICENSE",
+    "MIGRATION.md"
   ],
   "repository": {
     "type": "git",
