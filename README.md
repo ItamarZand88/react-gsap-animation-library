@@ -1,32 +1,40 @@
 # React GSAP Animation Library
 
-![Version](https://img.shields.io/badge/version-1.0.2-blue)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![React](https://img.shields.io/badge/React-16.8%2B-61DAFB)
+![GSAP](https://img.shields.io/badge/GSAP-3.12%2B-88CE02)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A comprehensive and easy-to-use React animation library built on top of GSAP (GreenSock Animation Platform) that provides beautiful, performant animations with multiple fallback layers.
+A comprehensive React animation library leveraging GSAP's official React integration (`useGSAP`) for optimal performance and developer experience. This library provides beautiful, performant animations with minimal setup and proper cleanup.
 
 ## Features
 
-- 🚀 **Simple to use**: Just wrap your components with our animation components
-- ⚙️ **Customizable**: Extensive options for customizing animations
-- 📱 **Responsive**: Works great on all device sizes
-- 🔄 **Scroll-based animations**: Trigger animations as elements enter the viewport
-- 🐞 **Robust fallbacks**: Three layers of fallbacks (GSAP, Web Animations API, CSS animations) 
-- 🛡️ **Fault-tolerant**: Smooth operation even when GSAP is unavailable or loading fails
-- 📦 **Independent components**: Each component works without depending on others
-- 🎛️ **Central configuration**: Global animation settings through context
-- 🌐 **SSR Support**: Proper functioning in server-side rendering environments
+- 🚀 **Official GSAP React Integration** - Uses `@gsap/react` for optimal performance
+- ⚙️ **Robust Animation Context** - Global settings with accessibility features
+- 📱 **Context-Safe Event Handlers** - Proper GSAP context association for event handlers
+- 🔄 **Scroll-Based Animations** - Integrated with GSAP's ScrollTrigger
+- 🐞 **Clean Unmounting** - Proper cleanup of animations on component unmount
+- 🧩 **Independent Components** - Each component works without depending on others
+- 🎛️ **Central Configuration** - Global animation settings through context
+- 🌐 **SSR Support** - Proper functioning in server-side rendering environments
+
+## What's New in Version 2.0.0
+
+This major update brings significant improvements:
+
+- Integration with the official `@gsap/react` package
+- Enhanced GSAP context management for proper cleanup
+- Improved animation performance and code organization
+- Better accessibility support including reduced motion preferences
+- Simplified API with more powerful features
 
 ## Installation
 
 ```bash
-npm install react-gsap-animation-library gsap
+npm install react-gsap-animation-library gsap @gsap/react
 # or
-yarn add react-gsap-animation-library gsap
+yarn add react-gsap-animation-library gsap @gsap/react
 ```
-
-> Note: GSAP is a peer dependency, but all components include fallbacks if GSAP isn't available.
 
 ## Quick Start
 
@@ -36,6 +44,7 @@ import {
   AnimationProvider, 
   FadeIn, 
   SlideIn, 
+  TextReveal,
   AnimatedButton 
 } from 'react-gsap-animation-library';
 
@@ -43,15 +52,25 @@ function App() {
   return (
     <AnimationProvider>
       <div className="app">
-        <FadeIn duration={1} delay={0.2}>
+        <FadeIn duration={1} delay={0.2} direction="up">
           <h1>Hello Animation World!</h1>
         </FadeIn>
         
-        <SlideIn direction="right" distance={100}>
-          <p>This text slides in from the right</p>
+        <SlideIn direction="right" distance={100} bounce={true}>
+          <p>This text slides in from the right with a bounce effect</p>
         </SlideIn>
         
-        <AnimatedButton effect="ripple">Click Me!</AnimatedButton>
+        <TextReveal 
+          direction="left" 
+          backgroundColor="#3498db" 
+          maskStyle="gradient"
+        >
+          Revealing text with a mask effect
+        </TextReveal>
+        
+        <AnimatedButton effect="ripple" effectColor="rgba(255, 255, 255, 0.5)">
+          Click Me!
+        </AnimatedButton>
       </div>
     </AnimationProvider>
   );
@@ -68,10 +87,11 @@ import { AnimationProvider, useAnimationSettings } from 'react-gsap-animation-li
 function App() {
   return (
     <AnimationProvider settings={{
-      defaultDuration: 0.8,
-      defaultEase: 'power3.out',
-      disableScrollAnimations: false,
-      animationQuality: 'high' // 'low', 'medium', 'high'
+      defaultDuration: 0.8,        // Default animation duration
+      defaultEase: 'power3.out',   // Default easing function
+      disableScrollAnimations: false,  // Disable all scroll-triggered animations
+      disableAllAnimations: false,     // Disable all animations completely
+      animationQuality: 'high'         // 'low', 'medium', 'high'
     }}>
       {/* Your app content */}
     </AnimationProvider>
@@ -81,7 +101,6 @@ function App() {
 // Access settings in any component
 function MyComponent() {
   const { 
-    gsapAvailable, 
     disableAllAnimations,
     updateSettings 
   } = useAnimationSettings();
@@ -103,8 +122,6 @@ function MyComponent() {
 
 ## Components
 
-The library includes the following components organized by category:
-
 ### Basic Animation Components
 
 #### `FadeIn`
@@ -118,7 +135,6 @@ Fades in elements with directional options.
   threshold={0.2}
   direction="up" // 'up', 'down', 'left', 'right', 'none'
   trigger="scroll" // 'scroll', 'load', 'none', 'hover', 'click'
-  onStart={() => console.log('Animation started')}
   onComplete={() => console.log('Animation completed')}
 >
   <h2>I will fade in!</h2>
@@ -135,24 +151,11 @@ Slides elements in from a specified direction with optional bounce effect.
   distance={100} 
   duration={0.8}
   bounce={true}
+  fade={true} // Fade in while sliding
   trigger="scroll"
 >
   <div>I slide in from the left!</div>
 </SlideIn>
-```
-
-#### `SimpleAnimated`
-
-A CSS-only animated component (no GSAP dependency).
-
-```jsx
-<SimpleAnimated 
-  animationType="fadeIn" // 'fadeIn', 'fadeInUp', 'slideInLeft', 'bounce', 'pulse', etc.
-  duration={0.5}
-  trigger="scroll" // 'scroll', 'load', 'none', 'hover', 'click'
->
-  <p>Simple CSS animation!</p>
-</SimpleAnimated>
 ```
 
 ### Text Animation Components
@@ -174,20 +177,6 @@ Reveals text with customizable mask effects.
 </TextReveal>
 ```
 
-#### `SplitText`
-
-Animates individual characters, words, or lines of text.
-
-```jsx
-<SplitText 
-  type="chars" // 'chars', 'words', 'lines'
-  stagger={0.05}
-  animation="fadeUp" // 'fade', 'blur', 'slideUp', etc.
->
-  This text animates character by character!
-</SplitText>
-```
-
 ### Interactive Components
 
 #### `AnimatedButton`
@@ -199,98 +188,127 @@ A button with various animation effects.
   effect="ripple" // 'ripple', 'shine', 'pulse', 'scale', 'fill'
   effectColor="rgba(255, 255, 255, 0.4)"
   duration={0.6}
-  trigger="hover" // 'hover', 'click', 'none'
   asChild={false} // Set to true to use children as the button
 >
   Click Me!
 </AnimatedButton>
+
+// Using as a wrapper for custom elements
+<AnimatedButton effect="shine" asChild={true}>
+  <div className="custom-button">
+    Custom Element
+  </div>
+</AnimatedButton>
 ```
 
-#### `AnimatedCard`
+## Hooks
 
-A card component with hover and entrance animations.
+### `useAnimation`
 
-```jsx
-<AnimatedCard 
-  effect="tilt" // 'tilt', 'lift', 'glow', 'border', 'shadow'
-  intensity={0.5}
-  entrance={{ y: 30, opacity: 0 }}
->
-  <h3>Card Title</h3>
-  <p>Card content goes here...</p>
-</AnimatedCard>
-```
-
-### Effect Components
-
-#### `ScrollProgress`
-
-Shows scroll progress with customizable styles.
+Wrapper around GSAP's `useGSAP` hook for consistent API:
 
 ```jsx
-<ScrollProgress 
-  height="5px" 
-  color="#ff0000"
-  position="top" // 'top', 'bottom', 'left', 'right'
-  indicator={true} // Show section indicators
-/>
-```
-
-#### `MagneticElement`
-
-Creates a magnetic effect, pulling elements toward the cursor.
-
-```jsx
-<MagneticElement 
-  strength={0.5}
-  radius={100}
-  type="attract" // 'attract', 'repel'
-  cumulativeEffect={false}
->
-  <button>Magnetic Button</button>
-</MagneticElement>
-```
-
-## Fallback Mechanisms
-
-The library implements three layers of fallbacks:
-
-1. **GSAP (Primary)**: When available, uses GSAP for the best animation quality
-2. **Web Animation API (Secondary)**: Falls back to the Web Animation API if GSAP fails
-3. **CSS Animations (Tertiary)**: Ultimate fallback to ensure animations always work
-
-These layers are automatically managed, so you don't need to worry about compatibility issues.
-
-## Safe Animation Hook
-
-For custom animations, use the `useSafeAnimation` hook:
-
-```jsx
-import { useSafeAnimation } from 'react-gsap-animation-library';
+import { useAnimation } from 'react-gsap-animation-library';
+import gsap from 'gsap';
 
 function MyComponent() {
-  const elementRef = useRef(null);
-  const { animate, isGsapAvailable } = useSafeAnimation(elementRef);
+  const { contextSafe } = useAnimation(() => {
+    gsap.to('.element', { opacity: 1, duration: 1 });
+  }, { 
+    scope: containerRef,
+    dependencies: [someProp],
+    revertOnUpdate: true
+  });
   
-  const playAnimation = () => {
-    animate({
-      from: {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        ease: 'power3.out'
-      }
-    });
-  };
+  // Create context-safe event handlers
+  const handleClick = contextSafe(() => {
+    gsap.to('.element', { scale: 1.2 });
+  });
   
   return (
-    <div>
-      <div ref={elementRef}>This element will animate</div>
-      <button onClick={playAnimation}>Play Animation</button>
+    <div ref={containerRef}>
+      <button onClick={handleClick}>Animate</button>
+      <div className="element">Content</div>
     </div>
   );
 }
 ```
+
+### `useAnimationEffect`
+
+Simplified hook for common animation patterns:
+
+```jsx
+import { useAnimationEffect } from 'react-gsap-animation-library';
+
+function MyComponent() {
+  const { ref, contextSafe } = useAnimationEffect({
+    animation: (containerRef) => {
+      gsap.from(containerRef.current, { opacity: 0, y: 30 });
+    },
+    dependencies: [someProp],
+    revertOnUpdate: true
+  });
+  
+  return <div ref={ref}>Animated content</div>;
+}
+```
+
+### `useScrollTrigger`
+
+Helper hook for ScrollTrigger animations:
+
+```jsx
+import { useScrollTrigger } from 'react-gsap-animation-library';
+import { useRef } from 'react';
+
+function MyComponent() {
+  const triggerRef = useRef(null);
+  const animation = gsap.timeline();
+  
+  animation.to('.element', { opacity: 1, y: 0 });
+  
+  useScrollTrigger({
+    trigger: triggerRef,
+    animation: animation,
+    start: "top center",
+    markers: true,
+    scrub: 0.5,
+    pin: true,
+    onEnter: () => console.log('Entered view')
+  });
+  
+  return (
+    <div ref={triggerRef}>
+      <div className="element">Scroll-animated content</div>
+    </div>
+  );
+}
+```
+
+## Render Props Pattern
+
+All components support a render props pattern for more control:
+
+```jsx
+<FadeIn>
+  {({ play }) => (
+    <div>
+      <h2>Manual control</h2>
+      <button onClick={play}>Trigger Animation</button>
+    </div>
+  )}
+</FadeIn>
+```
+
+## Accessibility
+
+The library respects the user's accessibility preferences:
+
+- Automatically detects and respects the `prefers-reduced-motion` setting
+- Adapts to low-end devices and low battery scenarios
+- Allows complete disabling of animations via context
+- Provides sensible defaults for a better user experience
 
 ## Server-Side Rendering (SSR)
 
@@ -300,28 +318,16 @@ The library is compatible with server-side rendering frameworks like Next.js. Al
 2. Properly initializing animations after hydration
 3. Respecting user preferences like reduced motion
 
-## Accessibility
-
-The library respects the user's accessibility preferences:
-
-- Automatically detects and respects the `prefers-reduced-motion` setting
-- Adapts to low-end devices and low battery scenarios
-- Allows complete disabling of animations via context
-
-## Performance
-
-To ensure good performance, the library:
-
-- Only animates elements when they're visible (using IntersectionObserver)
-- Avoids layout thrashing by batching animations
-- Provides quality settings for lower-end devices
-
 ## Browser Support
 
 - Chrome/Edge: Latest versions
 - Firefox: Latest versions
 - Safari: 11+
 - IE: Not supported
+
+## Migration from v1.x
+
+See the [Migration Guide](MIGRATION.md) for detailed instructions on upgrading from version 1.x.
 
 ## License
 
@@ -333,4 +339,4 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 
 ---
 
-Made with ❤️ by [Itamar Zand](https://github.com/ItamarZand88)
+Built with GSAP and ❤️ by [Itamar Zand](https://github.com/ItamarZand88)

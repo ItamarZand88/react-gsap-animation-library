@@ -1,7 +1,7 @@
 {
   "name": "react-gsap-animation-library",
-  "version": "1.0.2",
-  "description": "A comprehensive React component library that leverages GSAP for animations with robust fallbacks",
+  "version": "2.0.0",
+  "description": "A comprehensive React component library that leverages GSAP for animations with official GSAP-React integration",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -32,11 +32,9 @@
     "animation-library",
     "react-components",
     "gsap-animations",
-    "css-animations",
-    "react-transitions",
+    "gsap-react",
     "scroll-animations",
-    "fallbacks",
-    "web-animation-api",
+    "scrolltrigger",
     "accessible-animations"
   ],
   "author": "Itamar Zand",
@@ -48,12 +46,14 @@
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
-    "gsap": "^3.0.0"
+    "gsap": "^3.12.2 || ^4.0.0",
+    "@gsap/react": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",
     "@babel/preset-env": "^7.22.9",
     "@babel/preset-react": "^7.22.5",
+    "@gsap/react": "^1.0.0",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.2",
     "@rollup/plugin-node-resolve": "^15.1.0",
