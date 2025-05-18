@@ -21,8 +21,14 @@ export default {
   ],
   plugins: [
     peerDepsExternal(),
-    resolve(),
-    commonjs(),
+    resolve({
+      extensions: ['.js', '.jsx']
+    }),
+    commonjs({
+      include: 'node_modules/**',
+      // Explicitly handle JSX
+      transformMixedEsModules: true
+    }),
     typescript({
       tsconfig: './tsconfig.json',
       useTsconfigDeclarationDir: true,
@@ -31,6 +37,7 @@ export default {
       babelHelpers: 'bundled',
       exclude: 'node_modules/**',
       presets: ['@babel/preset-env', '@babel/preset-react'],
+      extensions: ['.js', '.jsx'],
     }),
     terser(),
   ],
