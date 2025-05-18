@@ -37,6 +37,7 @@ try {
     let indexContent = fs.readFileSync(indexPath, 'utf8');
     
     // Replace all imports from './components/Component.js' to './components/Component.jsx'
+    // Make sure we're not creating double extensions like .jsx.js
     jsFiles.forEach(file => {
       const componentName = file.replace('.js', '');
       const oldImport = `./components/${componentName}.js`;

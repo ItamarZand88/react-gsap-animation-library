@@ -6,12 +6,12 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rollup -c",
-    "start": "rollup -c -w",
+    "build": "rollup -c rollup.config.mjs",
+    "start": "rollup -c rollup.config.mjs -w",
     "test": "jest",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
-    "test:import": "node tests/import-test.mjs"
+    "test:import": "node tests/simple-check.js"
   },
   "files": [
     "dist",
