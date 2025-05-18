@@ -1,7 +1,7 @@
 {
   "name": "react-gsap-animation-library",
-  "version": "1.0.1",
-  "description": "A comprehensive React component library that leverages GSAP for animations",
+  "version": "1.0.2",
+  "description": "A comprehensive React component library that leverages GSAP for animations with robust fallbacks",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -34,7 +34,10 @@
     "gsap-animations",
     "css-animations",
     "react-transitions",
-    "scroll-animations"
+    "scroll-animations",
+    "fallbacks",
+    "web-animation-api",
+    "accessible-animations"
   ],
   "author": "Itamar Zand",
   "license": "MIT",
