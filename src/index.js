@@ -1,19 +1,19 @@
 // Main export file for our library
-import FadeIn from './components/FadeIn.js';
-import SlideIn from './components/SlideIn.js';
-import AnimatedButton from './components/AnimatedButton.js';
-import AnimatedCard from './components/AnimatedCard.js';
-import AnimatedList from './components/AnimatedList.js';
-import TextReveal from './components/TextReveal.js';
-import ParallaxSection from './components/ParallaxSection.js';
-import SplitText from './components/SplitText.js';
-import AnimatedCounter from './components/AnimatedCounter.js';
-import Marquee from './components/Marquee.js';
-import ScrollTriggeredTimeline from './components/ScrollTriggeredTimeline.js';
-import MagneticElement from './components/MagneticElement.js';
-import AnimatedCursor from './components/AnimatedCursor.js';
-import AnimatedBackground from './components/AnimatedBackground.js';
-import ScrollProgress from './components/ScrollProgress.js';
+import FadeIn from './components/FadeIn.jsx';
+import SlideIn from './components/SlideIn.jsx';
+import AnimatedButton from './components/AnimatedButton.jsx';
+import AnimatedCard from './components/AnimatedCard.jsx';
+import AnimatedList from './components/AnimatedList.jsx';
+import TextReveal from './components/TextReveal.jsx';
+import ParallaxSection from './components/ParallaxSection.jsx';
+import SplitText from './components/SplitText.jsx';
+import AnimatedCounter from './components/AnimatedCounter.jsx';
+import Marquee from './components/Marquee.jsx';
+import ScrollTriggeredTimeline from './components/ScrollTriggeredTimeline.jsx';
+import MagneticElement from './components/MagneticElement.jsx';
+import AnimatedCursor from './components/AnimatedCursor.jsx';
+import AnimatedBackground from './components/AnimatedBackground.jsx';
+import ScrollProgress from './components/ScrollProgress.jsx';
 
 // Export utility functions and hooks
 import * as animations from './utils/animations.js';
