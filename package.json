@@ -14,7 +14,9 @@
     "test:import": "node tests/import-test.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
@@ -26,7 +28,10 @@
     "animation",
     "components",
     "ui",
-    "library"
+    "library",
+    "animation-library",
+    "react-components",
+    "gsap-animations"
   ],
   "author": "Itamar Zand",
   "license": "MIT",
