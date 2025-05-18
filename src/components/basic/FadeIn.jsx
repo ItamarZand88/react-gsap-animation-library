@@ -1,21 +1,20 @@
-import React, { useRef, useState, useEffect } from 'react';
-import useSafeAnimation from '../../utils/useSafeAnimation';
+import React, { useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
 import { useAnimationSettings } from '../../context/AnimationContext';
-import { injectCSSKeyframes } from '../../utils/fallbacks';
 
 /**
- * FadeIn component for creating fade in animations with multiple fallback mechanisms
+ * FadeIn component for creating fade-in animations with GSAP
  * 
  * @param {Object} props - Component props
  * @param {React.ReactNode} props.children - Child elements to animate
  * @param {number} props.duration - Animation duration in seconds
  * @param {number} props.delay - Animation delay in seconds
- * @param {number} props.threshold - Viewport threshold to trigger animation (0-1)
- * @param {string} props.ease - Easing function
- * @param {number} props.stagger - Stagger delay for multiple children
- * @param {Object} props.from - Initial animation properties
+ * @param {string} props.ease - GSAP easing function
  * @param {string} props.direction - Fade direction ('up', 'down', 'left', 'right', 'none')
  * @param {string} props.trigger - Animation trigger type ('scroll', 'load', 'none', 'hover', 'click')
+ * @param {number} props.threshold - Viewport threshold to trigger animation (0-1)
  * @param {function} props.onStart - Callback when animation starts
  * @param {function} props.onComplete - Callback when animation completes
  * @param {string} props.className - Additional CSS class names
@@ -25,172 +24,129 @@ const FadeIn = ({
   children, 
   duration = 0.8, 
   delay = 0, 
-  threshold = 0.2,
   ease = "power3.out",
-  stagger = 0.1,
-  from = {},
   direction = 'up',
-  trigger = 'scroll', // 'scroll', 'load', 'none', 'hover', 'click'
+  trigger = 'scroll',
+  threshold = 0.2,
   onStart = () => {},
   onComplete = () => {},
   className = '',
   style = {},
   ...otherProps
 }) => {
-  // Get reference to the DOM element
   const elementRef = useRef(null);
-  
-  // Animation state
-  const [animationState, setAnimationState] = useState({
-    hasAnimated: false,
-    isAnimating: false
-  });
-  
-  // Get global animation settings
-  const {
-    disableAllAnimations,
-    disableScrollAnimations,
-    defaultDuration,
-    defaultEase,
-    defaultDelay,
-    defaultThreshold
-  } = useAnimationSettings();
-  
-  // Use safe animation hook
-  const { animate, isGsapAvailable } = useSafeAnimation(elementRef);
-  
-  // Determine if we have multiple children to animate
-  const childrenArray = React.Children.toArray(children);
-  const hasMultipleChildren = childrenArray.length > 1;
-  
-  // Inject CSS keyframes for fallback
-  useEffect(() => {
-    injectCSSKeyframes();
-  }, []);
+  const { disableAllAnimations, disableScrollAnimations } = useAnimationSettings();
   
   // Get direction-based animation properties
-  const getDirectionalFrom = () => {
-    const base = { opacity: 0 };
+  const getDirectionalProps = () => {
+    const baseProps = { opacity: 0 };
     
     switch (direction) {
       case 'up':
-        return { ...base, y: 30 };
+        return { ...baseProps, y: 30 };
       case 'down':
-        return { ...base, y: -30 };
+        return { ...baseProps, y: -30 };
       case 'left':
-        return { ...base, x: 30 };
+        return { ...baseProps, x: 30 };
       case 'right':
-        return { ...base, x: -30 };
+        return { ...baseProps, x: -30 };
       case 'none':
-        return base;
+        return baseProps;
       default:
-        return { ...base, y: 30 };
+        return { ...baseProps, y: 30 };
     }
   };
   
-  // Merge default 'from' with directional and custom props
-  const getAnimationProps = () => {
-    const directionalFrom = getDirectionalFrom();
-    
-    return {
-      from: {
-        ...directionalFrom,
-        ...from,
-        duration,
-        delay,
-        ease,
-        stagger: hasMultipleChildren ? stagger : 0,
-        onStart,
-        onComplete: () => {
-          setAnimationState({ hasAnimated: true, isAnimating: false });
-          onComplete();
-        }
-      }
-    };
-  };
-  
-  // Play animation
-  const playAnimation = () => {
-    // Skip if disabled or already animated/animating
-    if (disableAllAnimations || animationState.hasAnimated || animationState.isAnimating) return;
-    
-    setAnimationState({ ...animationState, isAnimating: true });
-    onStart();
-    
-    // Determine targets for animation
-    const targets = hasMultipleChildren ? elementRef.current.children : elementRef.current;
-    
-    // Animate with fallbacks
-    animate(getAnimationProps(), targets);
-  };
-  
-  // Reset animation
-  const resetAnimation = () => {
-    if (disableAllAnimations) return;
-    
-    setAnimationState({ hasAnimated: false, isAnimating: false });
-  };
-  
-  // Set up animation based on trigger type
-  useEffect(() => {
+  // Use GSAP React hook
+  const { contextSafe } = useGSAP(() => {
     if (!elementRef.current) return;
     
     // Skip if animations disabled
     if (disableAllAnimations || (trigger === 'scroll' && disableScrollAnimations)) {
+      // Make content visible
+      gsap.set(elementRef.current, { opacity: 1, x: 0, y: 0 });
       return;
     }
     
-    let observer;
-    let timeoutId;
-    
-    switch (trigger) {
-      case 'scroll':
-        setupScrollTrigger();
-        break;
-        
-      case 'load':
-        // Auto-play after load
-        timeoutId = setTimeout(playAnimation, 10);
-        break;
-        
-      case 'none':
-        // No auto-play
-        break;
+    // For load and scroll triggers
+    if (trigger === 'load' || trigger === 'scroll') {
+      // Get starting properties
+      const fromProps = getDirectionalProps();
+      
+      // Create the animation
+      const tween = gsap.from(elementRef.current, {
+        ...fromProps,
+        duration,
+        delay,
+        ease,
+        onStart,
+        onComplete,
+        paused: trigger === 'scroll'
+      });
+      
+      // Handle scroll trigger
+      if (trigger === 'scroll' && !disableScrollAnimations) {
+        ScrollTrigger.create({
+          trigger: elementRef.current,
+          start: `top bottom-=${threshold * 100}%`,
+          onEnter: () => tween.play()
+        });
+      } else if (trigger === 'load') {
+        // Play immediately for load trigger
+        tween.play();
+      }
     }
     
-    // Helper function for scroll trigger setup
-    function setupScrollTrigger() {
-      if (disableScrollAnimations) return;
-      
-      // Use IntersectionObserver as the universal solution
-      observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            playAnimation();
-            observer.disconnect();
-          }
-        },
-        { threshold }
-      );
-      
-      observer.observe(elementRef.current);
-    }
-    
-    // Cleanup
     return () => {
-      if (observer) observer.disconnect();
-      if (timeoutId) clearTimeout(timeoutId);
+      // Clean up ScrollTrigger instances on unmount
+      if (trigger === 'scroll') {
+        ScrollTrigger.getAll()
+          .filter(st => st.vars.trigger === elementRef.current)
+          .forEach(st => st.kill());
+      }
     };
-  }, [trigger, threshold, disableAllAnimations, disableScrollAnimations]);
+  }, { 
+    scope: elementRef,
+    dependencies: [
+      direction, 
+      duration, 
+      delay, 
+      ease, 
+      trigger, 
+      threshold,
+      disableAllAnimations, 
+      disableScrollAnimations
+    ]
+  });
   
-  // Set up event handlers based on trigger type
+  // Play animation function for manual triggers
+  const playAnimation = contextSafe(() => {
+    if (disableAllAnimations) return;
+    
+    const fromProps = getDirectionalProps();
+    
+    gsap.fromTo(
+      elementRef.current,
+      fromProps,
+      {
+        opacity: 1,
+        x: 0,
+        y: 0,
+        duration,
+        ease,
+        onStart,
+        onComplete
+      }
+    );
+  });
+  
+  // Get event handlers based on trigger type
   const getEventHandlers = () => {
     if (disableAllAnimations) return {};
     
     if (trigger === 'hover') {
       return {
-        onMouseEnter: playAnimation,
-        onMouseLeave: resetAnimation
+        onMouseEnter: playAnimation
       };
     }
     
@@ -204,15 +160,11 @@ const FadeIn = ({
   };
   
   // Combined props for rendering
-  const combinedStyle = {
-    ...style,
-  };
-  
   const componentProps = {
     ref: elementRef,
     className: `react-gsap-fadein ${className}`,
-    style: combinedStyle,
-    'data-animation-state': animationState.hasAnimated ? 'completed' : (animationState.isAnimating ? 'running' : 'initial'),
+    style,
+    'data-animation-direction': direction,
     ...getEventHandlers(),
     ...otherProps
   };
@@ -220,11 +172,7 @@ const FadeIn = ({
   return (
     <div {...componentProps}>
       {typeof children === 'function' 
-        ? children({ 
-            play: playAnimation, 
-            reset: resetAnimation, 
-            state: animationState 
-          }) 
+        ? children({ play: playAnimation }) 
         : children
       }
     </div>
